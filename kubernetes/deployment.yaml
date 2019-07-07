@@ -1,0 +1,50 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    app: base-akka-kubernetes
+  name: base-akka-kubernetes
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: base-akka-kubernetes
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: base-akka-kubernetes
+        actorSystemName: base-akka-kubernetes
+    spec:
+      containers:
+        - name: base-akka-kubernetes
+          image: localhost:30001/base-akka-kubernetes:0.1
+          imagePullPolicy: IfNotPresent
+          livenessProbe:
+            httpGet:
+              path: /alive
+              port: management
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: management
+          ports:
+            - name: remoting
+              containerPort: 2552
+              protocol: TCP
+            - containerPort: 8558
+              protocol: TCP
+              name: management
+            - containerPort: 8081
+              protocol: TCP
+              name: monitoring
+          env:
+            - name: AKKA_CLUSTER_BOOTSTRAP_SERVICE_NAME
+              valueFrom:
+                fieldRef:
+                  apiVersion: v1
+                  fieldPath: "metadata.labels['app']"
