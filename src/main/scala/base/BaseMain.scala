@@ -1,36 +1,28 @@
 package base
 
+import akka.actor.typed.scaladsl.adapter._
 import akka.actor.{Actor, ActorLogging, ActorSystem, Props}
 import akka.cluster.ClusterEvent.ClusterDomainEvent
+import akka.cluster.sharding.typed.scaladsl.ClusterSharding
 import akka.cluster.{Cluster, ClusterEvent}
 import akka.http.scaladsl.Http
-import akka.http.scaladsl.model._
 import akka.http.scaladsl.server.Directives._
 import akka.management.cluster.bootstrap.ClusterBootstrap
 import akka.management.scaladsl.AkkaManagement
 import akka.stream.ActorMaterializer
-import io.prometheus.client.hotspot.DefaultExports
+import base.Monitoring.monitored
 
 object DemoApp extends App {
-
   implicit val system = ActorSystem("Base")
+  implicit val executionContext = system.dispatcher
+  implicit val scheduler = system.scheduler
 
   import system.log
+
   implicit val mat = ActorMaterializer()
   val cluster = Cluster(system)
 
   log.info(s"Started [$system], cluster.selfAddress = ${cluster.selfAddress}")
-
-  DefaultExports.initialize()
-  val requestTime = io.prometheus.client.Histogram.build()
-    .exponentialBuckets(1, 2, 10)
-    .name("http_requests")
-    .help("HTTP requests")
-    .register()
-
-  import io.prometheus.client.exporter.HTTPServer
-
-  val metricsServer = new HTTPServer(8081)
 
   AkkaManagement(system).start()
   ClusterBootstrap(system).start()
@@ -41,19 +33,24 @@ object DemoApp extends App {
     classOf[ClusterDomainEvent]
   )
 
-  // add real app routes here
+  val sharding = ClusterSharding(system.toTyped)
+
+  //val dictionary = new DummyDictionary()
+  val dictionary = new ShardedDictionary(sharding)
+
   val routes =
-    path(Segments) { p =>
+    path("dictionary" / Segment) { key =>
       get {
-        complete(
-          {
-            requestTime.observe(0.0)
-            HttpEntity(
-              ContentTypes.`text/html(UTF-8)`,
-              s"<h1>Hello: $p</h1>"
-            )
+        onSuccess(monitored(Monitoring.metricGets, dictionary.get(key))) {
+          complete(_)
+        }
+      } ~
+      put {
+        entity(as[String]) { value =>
+          onSuccess(monitored(Monitoring.metricPuts, dictionary.set(key, value))) {
+            complete("stored")
           }
-        )
+        }
       }
     }
 
