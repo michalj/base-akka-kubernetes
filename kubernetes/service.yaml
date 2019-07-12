@@ -1,36 +1,29 @@
-# Please edit the object below. Lines beginning with a '#' will be ignored,
-# and an empty file will abort the edit. If an error occurs while saving this file will be
-# reopened with the relevant failures.
-#
 apiVersion: v1
 kind: Service
 metadata:
-  creationTimestamp: "2019-07-06T22:42:06Z"
   labels:
     app: base-akka-kubernetes
   name: base-akka-kubernetes
   namespace: base-akka-dev
-  resourceVersion: "1674633"
-  selfLink: /api/v1/namespaces/base-akka-dev/services/base-akka-kubernetes
-  uid: 47ebf9a1-a03f-11e9-8fff-d050998745fe
 spec:
-  clusterIP: 10.106.47.225
   ports:
-    - name: port-1
+    - name: remoting
       port: 2552
       protocol: TCP
       targetPort: 2552
-    - name: port-2
+    - name: management
       port: 8558
       protocol: TCP
       targetPort: 8558
-    - name: port-3
+    - name: monitoring
       port: 8081
       protocol: TCP
       targetPort: 8081
+    - name: main
+      port: 8080
+      protocol: TCP
+      targetPort: 8080
   selector:
     app: base-akka-kubernetes
   sessionAffinity: None
   type: ClusterIP
-status:
-  loadBalancer: {}

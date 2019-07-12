@@ -31,4 +31,10 @@ You should now be able to build and publish:
 Running
 =======
 
-TODO
+Enable monitoring:
+
+    apply -f monitoring.yaml
+    
+This assumes that you've installed prometheus operator with Helm, using
+release name `monitoring`. Change `release: monitoring` to match your
+set-up.

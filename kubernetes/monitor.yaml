@@ -1,0 +1,16 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: base-akka-kubernetes
+  labels:
+    app: base-akka-kubernetes
+    release: monitoring
+spec:
+  namespaceSelector:
+    any: true
+  selector:
+    matchLabels:
+      app: base-akka-kubernetes
+  endpoints:
+  - port: monitoring
+    interval: 10s

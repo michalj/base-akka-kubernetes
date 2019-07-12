@@ -1,0 +1,19 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /$1
+  name: base-akka-kubernetes
+spec:
+  rules:
+  - host: demo.kube.local
+    http:
+      paths:
+      - backend:
+          serviceName: base-akka-kubernetes
+          servicePort: 8558
+        path: /(cluster/.*)
+      - backend:
+          serviceName: base-akka-kubernetes
+          servicePort: 8080
+        path: /main/(.*)
