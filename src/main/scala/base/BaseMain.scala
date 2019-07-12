@@ -34,20 +34,19 @@ object DemoApp extends App {
   )
 
   val sharding = ClusterSharding(system.toTyped)
-
-  //val dictionary = new DummyDictionary()
   val dictionary = new ShardedDictionary(sharding)
-
   val routes =
     path("dictionary" / Segment) { key =>
       get {
         onSuccess(monitored(Monitoring.metricGets, dictionary.get(key))) {
+          log.info("get {}", key)
           complete(_)
         }
       } ~
       put {
         entity(as[String]) { value =>
           onSuccess(monitored(Monitoring.metricPuts, dictionary.set(key, value))) {
+            log.info("put {}={}", key, value)
             complete("stored")
           }
         }

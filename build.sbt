@@ -7,7 +7,7 @@ version := "0.1"
 scalaVersion := "2.12.8"
 
 val AkkaVersion = "2.5.21"
-val AkkaHttpVersion = "10.1.7"
+val AkkaHttpVersion = "10.1.8"
 val SprayJsonVersion = "1.3.5"
 val PrometheusClient = "0.6.0"
 
