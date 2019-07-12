@@ -23,7 +23,7 @@ spec:
       containers:
         - name: base-akka-kubernetes
           image: localhost:30001/base-akka-kubernetes:0.1
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: Always
           livenessProbe:
             httpGet:
               path: /alive
