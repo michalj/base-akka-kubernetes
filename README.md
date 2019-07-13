@@ -31,9 +31,22 @@ You should now be able to build and publish:
 Running
 =======
 
+Create role and role binding to allow the app to find fellow instances
+via Kubernetes API:
+
+    kubectl apply -f role.yaml
+    # this assumes you run everything in namespace 'base-akka-dev'
+    kubectl apply -f role-binding.yaml
+
+Create the deployment and the service (mind that you might need to
+change the `image` to match your repository name):
+
+    kubectl apply -f deployment.yaml
+    kubectl apply -f service.yaml
+
 Enable monitoring:
 
-    apply -f monitoring.yaml
+    kubectl apply -f monitoring.yaml
     
 This assumes that you've installed prometheus operator with Helm, using
 release name `monitoring`. Change `release: monitoring` to match your
